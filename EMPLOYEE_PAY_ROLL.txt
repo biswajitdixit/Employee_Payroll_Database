@@ -1,0 +1,515 @@
+-----------------------------------------------------------------------------WELCOME TO EMPLOYEE PAYROLL---------------------------------------------------------------
+# UC 1 -Ability to create database
+----------------------------------
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+mysql> CREATE DATABASE payroll_service;
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| payroll_service    |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+
+# UC2 - Ability to create employee payroll table
+------------------------------------------------
+
+mysql> USE payroll_service;
+Database changed
+mysql> create table employee_payroll
+    -> (
+    -> id    INT unsigned not null AUTO_INCREMENT ,     # uniqueid for record
+    -> name  varchar(150) not null ,                    # name of the employee
+    -> salary double not null ,                         # employee salary
+    -> start  date not null ,                           # employee start date
+    -> primary key (id)                                 # make id primary key
+    -> );
+
+mysql> desc employee_payroll;                           # describe table
++--------+--------------+------+-----+---------+----------------+
+| Field  | Type         | Null | Key | Default | Extra          |
++--------+--------------+------+-----+---------+----------------+
+| id     | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name   | varchar(150) | NO   |     | NULL    |                |
+| salary | double       | NO   |     | NULL    |                |
+| start  | date         | NO   |     | NULL    |                |
++--------+--------------+------+-----+---------+----------------+
+
+# UC3 -Ability to create data.
+------------------------------
+
+mysql> insert into employee_payroll (name ,salary , start ) values  # insert operation
+    -> ('Mark' , 100000000.00 , '2021-02-24'),
+    -> ('Bill' , 2000000000.00 , '2020-02-25'),
+    -> ('Charli' , 500000000.00 , '2020-03-25');
+
+# UC4 -Ability to retrive all employeedata.
+-------------------------------------------
+
+mysql> select * from employee_payroll;
++----+--------+------------+------------+
+| id | name   | salary     | start      |
++----+--------+------------+------------+
+|  1 | Mark   |  100000000 | 2021-02-24 |
+|  2 | Bill   | 2000000000 | 2020-02-25 |
+|  3 | Charli |  500000000 | 2020-03-25 |
++----+--------+------------+------------+
+mysql> select salary from employee_payroll where name ='Bill';
++------------+
+| salary     |
++------------+
+| 2000000000 |
++------------+
+
+# UC5 -Ability to retrieve salary data for a particular emp by joining date
+---------------------------------------------------------------------------
+
+mysql> select * from employee_payroll where start between cast( '2020-01-10' as date)
+    -> and date(now());
++----+--------+------------+------------+
+| id | name   | salary     | start      |
++----+--------+------------+------------+
+|  1 | Mark   |  100000000 | 2021-02-24 |
+|  2 | Bill   | 2000000000 | 2020-02-25 |
+|  3 | Charli |  500000000 | 2020-03-25 |
++----+--------+------------+------------+
+
+
+
+# UC6 -Ability to add gender coloumn in table
+----------------------------------------------
+mysql> alter table employee_payroll add gender char(1) after name ;     # adding gender field
+
+mysql> desc employee_payroll;
++--------+--------------+------+-----+---------+----------------+
+| Field  | Type         | Null | Key | Default | Extra          |
++--------+--------------+------+-----+---------+----------------+
+| id     | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name   | varchar(150) | NO   |     | NULL    |                |
+| gender | char(1)      | YES  |     | NULL    |                |
+| salary | double       | NO   |     | NULL    |                |
+| start  | date         | NO   |     | NULL    |                |
++--------+--------------+------+-----+---------+----------------+
+mysql> update employee_payroll
+    -> set gender = 'M'
+    -> where name = 'Mark' or name = 'Bill' or name = 'Charli';
+mysql> select * from employee_payroll ;
++----+--------+--------+------------+------------+
+| id | name   | gender | salary     | start      |
++----+--------+--------+------------+------------+
+|  1 | Mark   | M      |  100000000 | 2021-02-24 |
+|  2 | Bill   | M      | 2000000000 | 2020-02-25 |
+|  3 | Charli | M      |  500000000 | 2020-03-25 |
++----+--------+--------+------------+------------+
+mysql> insert into employee_payroll (name , salary , start , gender) values
+    -> ('Anandi' , 15525422.0 , '2020-02-26' , 'F') ,
+    -> ('Dj' , 1255522.05 , '2021-01-25' , 'F');
+mysql> select * from employee_payroll ;
++----+--------+--------+------------+------------+
+| id | name   | gender | salary     | start      |
++----+--------+--------+------------+------------+
+|  1 | Mark   | M      |  100000000 | 2021-02-24 |
+|  2 | Bill   | M      | 2000000000 | 2020-02-25 |
+|  3 | Charli | M      |  500000000 | 2020-03-25 |
+|  4 | Anandi | F      |   15525422 | 2020-02-26 |
+|  5 | Dj     | F      | 1255522.05 | 2021-01-25 |
++----+--------+--------+------------+------------+
+
+
+
+#UC7 -Abilty to find sum ,avg ,min,max,count
+---------------------------------------------
+mysql> select gender,sum(salary) from employee_payroll where gender = 'F' group by gender;
++--------+-------------+
+| gender | sum(salary) |
++--------+-------------+
+| F      | 16780944.05 |
++--------+-------------+
+
+mysql> select gender,sum(salary) from employee_payroll where gender = 'M' group by gender;
++--------+-------------+
+| gender | sum(salary) |
++--------+-------------+
+| M      |  2600000000 |
++--------+-------------+
+mysql> select name , gender ,max(salary) from employee_payroll where gender = 'M'
+    -> group by gender;
++------+--------+-------------+
+| name | gender | max(salary) |
++------+--------+-------------+
+| Mark | M      |  2000000000 |
++------+--------+-------------+
+mysql> select name , gender ,max(salary) from employee_payroll where gender = 'F'
+    -> group by gender;
++--------+--------+-------------+
+| name   | gender | max(salary) |
++--------+--------+-------------+
+| Anandi | F      |    15525422 |
++--------+--------+-------------+
+mysql> select name , gender , min(salary) from employee_payroll where gender = 'M'
+    -> group by gender;
++------+--------+-------------+
+| name | gender | min(salary) |
++------+--------+-------------+
+| Mark | M      |   100000000 |
++------+--------+-------------+
+mysql> select name , gender , min(salary) from employee_payroll where gender = 'F'
+    -> group by gender;
++--------+--------+-------------+
+| name   | gender | min(salary) |
++--------+--------+-------------+
+| Anandi | F      |  1255522.05 |
++--------+--------+-------------+
+
+mysql> select name , gender , avg(salary) from employee_payroll where gender = 'F'
+    -> group by gender;
++--------+--------+-------------+
+| name   | gender | avg(salary) |
++--------+--------+-------------+
+| Anandi | F      | 8390472.025 |
++--------+--------+-------------+
+mysql> select name , gender , avg(salary) from employee_payroll where gender = 'M'
+    -> group by gender;
++------+--------+-------------------+
+| name | gender | avg(salary)       |
++------+--------+-------------------+
+| Mark | M      | 866666666.6666666 |
++------+--------+-------------------+
+mysql> select name , gender , count(salary) from employee_payroll where gender = 'M'
+    -> group by gender;
++------+--------+---------------+
+| name | gender | count(salary) |
++------+--------+---------------+
+| Mark | M      |             3 |
++------+--------+---------------+
+
+mysql> select name , gender , count(salary) from employee_payroll where gender = 'F'
+    -> group by gender;
++--------+--------+---------------+
+| name   | gender | count(salary) |
++--------+--------+---------------+
+| Anandi | F      |             2 |
++--------+--------+---------------+
+
+
+#UC8-Ability to extend employee_payroll data to store employee information like employee phone, address,department
+------------------------------------------------------------------------------------------------------------------
+mysql> alter table employee_payroll add phonenumber varchar(15) after name ;
+mysql> alter table employee_payroll add address varchar(250) after phonenumber;
+mysql> alter table employee_payroll add department varchar(150) not null after address;
+mysql> alter table employee_payroll alter address set default 'INDIA' ;
+mysql> select * from employee_payroll;
++----+--------+-------------+---------+------------+--------+------------+------------+
+| id | name   | phonenumber | address | department | gender | salary     | start      |
++----+--------+-------------+---------+------------+--------+------------+------------+
+|  1 | Mark   | NULL        | NULL    |            | M      |  100000000 | 2021-02-24 |
+|  2 | Bill   | NULL        | NULL    |            | M      | 2000000000 | 2020-02-25 |
+|  3 | Charli | NULL        | NULL    |            | M      |  500000000 | 2020-03-25 |
+|  4 | Anandi | NULL        | NULL    |            | F      |   15525422 | 2020-02-26 |
+|  5 | Dj     | NULL        | NULL    |            | F      | 1255522.05 | 2021-01-25 |
++----+--------+-------------+---------+------------+--------+------------+------------+
+
+mysql> desc employee_payroll;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| id          | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name        | varchar(150) | NO   |     | NULL    |                |
+| phonenumber | varchar(15)  | YES  |     | NULL    |                |
+| address     | varchar(250) | YES  |     | INDIA   |                |
+| department  | varchar(150) | NO   |     | NULL    |                |
+| gender      | char(1)      | YES  |     | NULL    |                |
+| salary      | double       | NO   |     | NULL    |                |
+| start       | date         | NO   |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+mysql> insert into employee_payroll(name , salary ,start ,gender ,department) values
+    -> ('Biswa' , 2202202.20 , '2020-02-28' , 'M' , 'Mechanical');
+mysql> select * from employee_payroll;
++----+--------+-------------+---------+------------+--------+------------+------------+
+| id | name   | phonenumber | address | department | gender | salary     | start      |
++----+--------+-------------+---------+------------+--------+------------+------------+
+|  1 | Mark   | NULL        | NULL    |            | M      |  100000000 | 2021-02-24 |
+|  2 | Bill   | NULL        | NULL    |            | M      | 2000000000 | 2020-02-25 |
+|  3 | Charli | NULL        | NULL    |            | M      |  500000000 | 2020-03-25 |
+|  4 | Anandi | NULL        | NULL    |            | F      |   15525422 | 2020-02-26 |
+|  5 | Dj     | NULL        | NULL    |            | F      | 1255522.05 | 2021-01-25 |
+|  6 | Biswa  | NULL        | INDIA   | Mechanical | M      |  2202202.2 | 2020-02-28 |
++----+--------+-------------+---------+------------+--------+------------+------------+
+
+#UC9 -Ability to extend employee_payroll table to have Basic Pay, Deductions, Taxable Pay,Income Tax, Net Pay.
+--------------------------------------------------------------------------------------------------------------
+mysql> alter table employee_payroll rename column salary to basic_pay;
+mysql> alter table employee_payroll add deductions double not null after basic_pay;
+mysql> alter table employee_payroll add taxable_pay double not null after deductions;
+mysql> alter table employee_payroll add tax double not null after taxable_pay;
+mysql> alter table employee_payroll add net_pay double not null after tax;
+mysql> select * from employee_payroll;
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+-----+---------+------------+
+| id | name   | phonenumber | address | department | gender | basic_pay  | deductions | taxable_pay | tax | net_pay | start      |
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+-----+---------+------------+
+|  1 | Mark   | NULL        | NULL    |            | M      |  100000000 |          0 |           0 |   0 |       0 | 2021-02-24 |
+|  2 | Bill   | NULL        | NULL    |            | M      | 2000000000 |          0 |           0 |   0 |       0 | 2020-02-25 |
+|  3 | Charli | NULL        | NULL    |            | M      |  500000000 |          0 |           0 |   0 |       0 | 2020-03-25 |
+|  4 | Anandi | NULL        | NULL    |            | F      |   15525422 |          0 |           0 |   0 |       0 | 2020-02-26 |
+|  5 | Dj     | NULL        | NULL    |            | F      | 1255522.05 |          0 |           0 |   0 |       0 | 2021-01-25 |
+|  6 | Biswa  | NULL        | INDIA   | Mechanical | M      |  2202202.2 |          0 |           0 |   0 |       0 | 2020-02-28 |
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+-----+---------+------------+
+
+mysql> update employee_payroll set department = 'Sales' where name = 'Dj';
+mysql> select * from employee_payroll;
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+-----+---------+------------+
+| id | name   | phonenumber | address | department | gender | basic_pay  | deductions | taxable_pay | tax | net_pay | start      |
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+-----+---------+------------+
+|  1 | Mark   | NULL        | NULL    |            | M      |  100000000 |          0 |           0 |   0 |       0 | 2021-02-24 |
+|  2 | Bill   | NULL        | NULL    |            | M      | 2000000000 |          0 |           0 |   0 |       0 | 2020-02-25 |
+|  3 | Charli | NULL        | NULL    |            | M      |  500000000 |          0 |           0 |   0 |       0 | 2020-03-25 |
+|  4 | Anandi | NULL        | NULL    |            | F      |   15525422 |          0 |           0 |   0 |       0 | 2020-02-26 |
+|  5 | Dj     | NULL        | NULL    | Sales      | F      | 1255522.05 |          0 |           0 |   0 |       0 | 2021-01-25 |
+|  6 | Biswa  | NULL        | INDIA   | Mechanical | M      |  2202202.2 |          0 |           0 |   0 |       0 | 2020-02-28 |
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+-----+---------+------------+
+
+#UC10 -Ability to make "Dj" as part of Sales and Marketing Department
+----------------------------------------------------------------------
+mysql> insert into employee_payroll (name,department,gender,basic_pay, deductions, taxable_pay, tax, net_pay, start) values
+    -> ('Dj','Marketting', 'F', 3000000.00, 1000000.00, 2000000.00,500000.00,150000.00,'2021-01-28');
+mysql> select *  from employee_payroll;
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+--------+---------+------------+
+| id | name   | phonenumber | address | department | gender | basic_pay  | deductions | taxable_pay | tax    | net_pay | start      |
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+--------+---------+------------+
+|  1 | Mark   | NULL        | NULL    |            | M      |  100000000 |          0 |           0 |      0 |       0 | 2021-02-24 |
+|  2 | Bill   | NULL        | NULL    |            | M      | 2000000000 |          0 |           0 |      0 |       0 | 2020-02-25 |
+|  3 | Charli | NULL        | NULL    |            | M      |  500000000 |          0 |           0 |      0 |       0 | 2020-03-25 |
+|  4 | Anandi | NULL        | NULL    |            | F      |   15525422 |          0 |           0 |      0 |       0 | 2020-02-26 |
+|  5 | Dj     | NULL        | NULL    | Sales      | F      | 1255522.05 |          0 |           0 |      0 |       0 | 2021-01-25 |
+|  6 | Biswa  | NULL        | INDIA   | Mechanical | M      |  2202202.2 |          0 |           0 |      0 |       0 | 2020-02-28 |
+|  7 | Dj     | NULL        | INDIA   | Marketting | F      |    3000000 |    1000000 |     2000000 | 500000 |  150000 | 2021-01-28 |
++----+--------+-------------+---------+------------+--------+------------+------------+-------------+--------+---------+------------+
+mysql> select * from employee_payroll where name = 'Dj';
++----+------+-------------+---------+------------+--------+------------+------------+-------------+--------+---------+------------+
+| id | name | phonenumber | address | department | gender | basic_pay  | deductions | taxable_pay | tax    | net_pay | start      |
++----+------+-------------+---------+------------+--------+------------+------------+-------------+--------+---------+------------+
+|  5 | Dj   | NULL        | NULL    | Sales      | F      | 1255522.05 |          0 |           0 |      0 |       0 | 2021-01-25 |
+|  7 | Dj   | NULL        | INDIA   | Marketting | F      |    3000000 |    1000000 |     2000000 | 500000 |  150000 | 2021-01-28 |
++----+------+-------------+---------+------------+--------+------------+------------+-------------+--------+---------+------------+
+
+
+#UC-11-Implement ER Diagram in Payroll Service DB
+--------------------------------------------------
+mysql> show databases
+    -> ;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| payroll_service    |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+
+mysql> create table company(
+    -> company_id int NOT NULL PRIMARY KEY,
+    -> company_name VARCHAR(250) NOT NULL);
+
+mysql> desc company;
++--------------+--------------+------+-----+---------+-------+
+| Field        | Type         | Null | Key | Default | Extra |
++--------------+--------------+------+-----+---------+-------+
+| company_id   | int          | NO   | PRI | NULL    |       |
+| company_name | varchar(250) | NO   |     | NULL    |       |
++--------------+--------------+------+-----+---------+-------+
+mysql> create table employee_details(
+    -> emp_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ->name VARCHAR(50) NOT NULL,
+    ->company_id int,
+    ->phone_number VARCHAR(50) NOT NULL,
+    ->address VARCHAR(250) NOT NULL,
+    ->gender CHAR(1),
+    ->start DATE NOT NULL,
+    ->FOREIGN KEY (company_id) REFERENCES company (company_id)
+    ->)ENGINE=INNODB;
+mysql> desc employee_details;
++--------------+--------------+------+-----+---------+----------------+
+| Field        | Type         | Null | Key | Default | Extra          |
++--------------+--------------+------+-----+---------+----------------+
+| emp_id       | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name         | varchar(50)  | NO   |     | NULL    |                |
+| company_id   | int          | YES  | MUL | NULL    |                |
+| phone_number | varchar(50)  | NO   |     | NULL    |                |
+| address      | varchar(250) | NO   |     | NULL    |                |
+| gender       | char(1)      | YES  |     | NULL    |                |
+| start        | date         | NO   |     | NULL    |                |
++--------------+--------------+------+-----+---------+----------------+
+mysql> create table department (
+     ->dept_id int NOT NULL PRIMARY KEY,
+     ->dep_name VARCHAR(150) NOT NULL);
+
+mysql> desc department;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| dept_id  | int          | NO   | PRI | NULL    |       |
+| dep_name | varchar(150) | NO   |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+mysql> create table payroll (
+    ->emp_id int unsigned NOT NULL AUTO_INCREMENT,
+    ->basic_pay Double NOT NULL,
+    ->deductions Double NOT NULL,
+    ->taxable_pay Double NOT NULL,
+    ->tax Double NOT NULL,
+    ->net_pay Double NOT NULL,
+    ->FOREIGN KEY (emp_id) REFERENCES employee_details(emp_id));
+
+mysql> desc payroll;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| emp_id      | int unsigned | NO   | MUL | NULL    | auto_increment |
+| basic_pay   | double       | NO   |     | NULL    |                |
+| deductions  | double       | NO   |     | NULL    |                |
+| taxable_pay | double       | NO   |     | NULL    |                |
+| tax         | double       | NO   |     | NULL    |                |
+| net_pay     | double       | NO   |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+mysql> create table employee_department (
+    ->emp_id int unsigned NOT NULL AUTO_INCREMENT,
+    ->dept_id int NOT NULL,
+    ->FOREIGN KEY (emp_id) REFERENCES employee_details(emp_id),
+    ->FOREIGN KEY (dept_id) REFERENCES department(dept_id));
+mysql> desc employee_department;
++---------+--------------+------+-----+---------+----------------+
+| Field   | Type         | Null | Key | Default | Extra          |
++---------+--------------+------+-----+---------+----------------+
+| emp_id  | int unsigned | NO   | MUL | NULL    | auto_increment |
+| dept_id | int          | NO   | MUL | NULL    |                |
++---------+--------------+------+-----+---------+----------------+
+mysql> show tables;
++---------------------------+
+| Tables_in_payroll_service |
++---------------------------+
+| company                   |
+| department                |
+| employee_department       |
+| employee_details          |
+| employee_payroll          |
+| payroll                   |
++---------------------------+
+
+# UC-12 : Retrive Query
+------------------------
+mysql> insert into company(company_id , company_name )values (2,'BridgeLab');
+mysql> select * from company;
++------------+--------------+
+| company_id | company_name |
++------------+--------------+
+|          2 | BridgeLab    |
++------------+--------------+
+ insert into employee_details(name,company_id,emp_id,phone_number,address,gender,start) values('Bhushan',2,1,'6989569565','pune','M','2020-02-25'),
+    -> ('Ashwini',2,2,'26536533655','maharastra','F','2020-01-25'),
+     -> ('Anandi',2,3,'355355533','jharsuguda','F','2021-08-21'),
+    -> ('Chinmay',2,4,'125565235','Jajpur','M','2020-01-21');
+mysql> select * from employee_details;
++--------+---------+------------+--------------+------------+--------+------------+
+| emp_id | name    | company_id | phone_number | address    | gender | start      |
++--------+---------+------------+--------------+------------+--------+------------+
+|      1 | Bhushan |          2 | 6989569565   | pune       | M      | 2020-02-25 |
+|      2 | Ashwini |          2 | 26536533655  | maharastra | F      | 2020-01-25 |
+|      3 | Anandi  |          2 | 355355533    | jharsuguda | F      | 2021-08-21 |
+|      4 | Chinmay |          2 | 125565235    | Jajpur     | M      | 2020-01-21 |
++--------+---------+------------+--------------+------------+--------+------------+
+mysql> insert into payroll(emp_id, basic_pay,deductions,taxable_pay,tax,net_pay)
+    -> values (3,50000,1000,20000,2000,30000),
+    -> (4,70000,2000,25000,5000,45000),
+    -> (3,50000,1000,20000,2000,30000),
+    -> (4,70000,2000,25000,5000,45000);
+mysql> select * from payroll;
++--------+-----------+------------+-------------+------+---------+
+| emp_id | basic_pay | deductions | taxable_pay | tax  | net_pay |
++--------+-----------+------------+-------------+------+---------+
+|      1 |     50000 |       1000 |       20000 | 2000 |   30000 |
+|      2 |     70000 |       2000 |       25000 | 5000 |   45000 |
+|      3 |     50000 |       1000 |       20000 | 2000 |   30000 |
+|      4 |     70000 |       2000 |       25000 | 5000 |   45000 |
++--------+-----------+------------+-------------+------+---------+
+mysql> insert into department (dept_id, dep_name) values
+    -> (1,'Sales'),
+    -> (2,'Marketing');
+mysql> select * from department;
++---------+-----------+
+| dept_id | dep_name  |
++---------+-----------+
+|       1 | Sales     |
+|       2 | Marketing |
++---------+-----------+
+mysql> insert into employee_department (emp_id,dept_id) values
+    -> (1,1),
+    -> (2,2),
+    -> (3,2),
+    -> (4,1);
+mysql> select * from employee_department;
++--------+---------+
+| emp_id | dept_id |
++--------+---------+
+|      1 |       1 |
+|      2 |       2 |
+|      3 |       2 |
+|      4 |       1 |
++--------+---------+
+mysql>  select sum(p.net_pay), e.gender from employee_details e left join payroll
+    ->  p on p.emp_id = e.emp_id group by e.gender;
++----------------+--------+
+| sum(p.net_pay) | gender |
++----------------+--------+
+|          75000 | M      |
+|          75000 | F      |
++----------------+--------+
+mysql> select avg(p.net_pay), e.gender from employee_details e left join payroll
+    ->  p on p.emp_id = e.emp_id group by e.gender;
++----------------+--------+
+| avg(p.net_pay) | gender |
++----------------+--------+
+|          37500 | M      |
+|          37500 | F      |
++----------------+--------+
+mysql> select min(p.net_pay), e.gender from employee_details e left join payroll
+    ->  p on p.emp_id = e.emp_id group by e.gender;
++----------------+--------+
+| min(p.net_pay) | gender |
++----------------+--------+
+|          30000 | M      |
+|          30000 | F      |
++----------------+--------+
+mysql> select max(p.net_pay), e.gender from employee_details e left join payroll
+    ->  p on p.emp_id = e.emp_id group by e.gender;
++----------------+--------+
+| max(p.net_pay) | gender |
++----------------+--------+
+|          45000 | M      |
+|          45000 | F      |
++----------------+--------+
+mysql> select count(p.net_pay), e.gender from employee_details e left join payroll
+    ->  p on p.emp_id = e.emp_id group by e.gender;
++------------------+--------+
+| count(p.net_pay) | gender |
++------------------+--------+
+|                2 | M      |
+|                2 | F      |
++------------------+--------+
